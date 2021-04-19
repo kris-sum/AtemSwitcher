@@ -41,10 +41,10 @@ namespace AtemAudioMonitorSwitcher
 				return;
 			}
 			AutoResetEvent evt = new AutoResetEvent(false);
-			atem.fetchAudioInputs();
 			Console.WriteLine("Found Fairlight audio mixer");
+			Console.Write("Entering monitor mode - CTRL-C to exit");
+			atem.fetchAudioInputs();
 			evt.WaitOne();
-			Console.Write("Press ENTER to exit...");
             Console.ReadLine();
         }
     }
@@ -131,7 +131,9 @@ namespace AtemAudioMonitorSwitcher
 		IBMDSwitcherFairlightAudioSource m_audioSource;
 		int lineIndex = 0;
 		long inputId;
+		_BMDSwitcherFairlightAudioInputType inputType;
 		long sourceId;
+		_BMDSwitcherFairlightAudioSourceType sourceType;
 		long milliseconds = DateTimeOffset.Now.ToUnixTimeMilliseconds();
 
 		public AtemAudioSource(IBMDSwitcherFairlightAudioInput audioInput, IBMDSwitcherFairlightAudioSource audioSource, int index)
@@ -140,7 +142,9 @@ namespace AtemAudioMonitorSwitcher
 			m_audioSource = audioSource;
 			lineIndex = index;
 			this.m_audioInput.GetId(out inputId);
+			this.m_audioInput.GetType(out inputType);
 			this.m_audioSource.GetId(out sourceId);
+			this.m_audioSource.GetSourceType(out sourceType);
 		}
 
 		public void Notify(_BMDSwitcherFairlightAudioSourceEventType eventType)
@@ -150,7 +154,7 @@ namespace AtemAudioMonitorSwitcher
 
 		public void OutputLevelNotification(uint numLevels, ref double levels, uint numPeakLevels, ref double peakLevels)
 		{
-			if (DateTimeOffset.Now.ToUnixTimeMilliseconds() - milliseconds < 100)
+			if (DateTimeOffset.Now.ToUnixTimeMilliseconds() - milliseconds < 80)
             {
 				return;
             }
@@ -175,7 +179,7 @@ namespace AtemAudioMonitorSwitcher
 					Console.Write(string.Concat(Enumerable.Repeat(' ', 25 - characters)));
 				}
 
-				Console.Write(string.Format(" | {0,5:00.00} dB | input {1}/{2}", levels, inputId, sourceId));
+				Console.Write(string.Format(" | {0,5:00.00} dB | input {1}({2})/{3}({4})", levels, inputType.ToString().Substring(34), inputId, sourceType.ToString().Substring(35), sourceId));
 			}
 			milliseconds = DateTimeOffset.Now.ToUnixTimeMilliseconds();
 			//throw new NotImplementedException();
