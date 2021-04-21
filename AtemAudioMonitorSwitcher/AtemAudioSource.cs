@@ -10,6 +10,7 @@ namespace AtemAudioMonitorSwitcher
 	{
 		public IBMDSwitcherFairlightAudioInput m_audioInput;
 		public _BMDSwitcherFairlightAudioInputType inputType;
+		public _BMDSwitcherExternalPortType portType;
 		public IBMDSwitcherFairlightAudioSource m_audioSource;
 		public _BMDSwitcherFairlightAudioSourceType sourceType;
 
@@ -24,10 +25,26 @@ namespace AtemAudioMonitorSwitcher
 			m_audioInput = audioInput;
 			m_audioSource = audioSource;
 			lineIndex = index;
+			this.m_audioInput.GetCurrentExternalPortType(out portType);
 			this.m_audioInput.GetId(out inputId);
 			this.m_audioInput.GetType(out inputType);
 			this.m_audioSource.GetId(out sourceId);
 			this.m_audioSource.GetSourceType(out sourceType);
+		}
+
+		public String getInputType()
+        {
+			return inputType.ToString().Substring(34);
+        }
+
+		public String getPortType()
+		{
+			return portType.ToString().Substring(27);
+        }
+
+		public String getSourceType()
+		{
+			return sourceType.ToString().Substring(35);
 		}
 
 		public void Notify(_BMDSwitcherFairlightAudioSourceEventType eventType)
@@ -85,7 +102,10 @@ namespace AtemAudioMonitorSwitcher
 				{
 					Console.Write(string.Concat(Enumerable.Repeat(' ', 25 - characters)));
 				}*/
-				Console.Write(string.Format("{0,5:00.00} dB {1} {2}", levels, inputType.ToString().Substring(34), sourceType.ToString().Substring(35)));
+				Console.Write(string.Format("{0,5:00.00} dB {1} {2} {3}", levels,
+					getPortType(),
+					getInputType(),
+					getSourceType()));
 			}
 			milliseconds = DateTimeOffset.Now.ToUnixTimeMilliseconds();
 		}

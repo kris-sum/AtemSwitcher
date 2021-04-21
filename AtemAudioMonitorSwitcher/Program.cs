@@ -87,14 +87,15 @@ namespace AtemAudioMonitorSwitcher
 			}
 			Console.WriteLine("");
 			Console.WriteLine("Audio inputs:");
-			Console.WriteLine("[input id / source id] type");
+			Console.WriteLine("[input id / source id] port / type");
 
 			foreach (AtemAudioInputSource audioSource in atem.GetAudioInputSources()) {
-				Console.WriteLine(string.Format("[{0,6}/{1,6}] {2} {3}",
+				Console.WriteLine(string.Format("[{0,6}/{1,6}] {2} / {3} {4} ",
 					audioSource.inputId,
 					audioSource.sourceId,
-					audioSource.inputType.ToString().Substring(34),
-					audioSource.sourceType.ToString().Substring(35)
+					audioSource.getPortType(),
+					audioSource.getInputType(),
+					audioSource.getSourceType()
 					));
 			}
 		}
