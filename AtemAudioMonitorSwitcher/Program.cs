@@ -88,11 +88,20 @@ namespace AtemAudioMonitorSwitcher
 			Console.WriteLine("");
 
 			Console.WriteLine("Audio inputs:");
-			Console.WriteLine("[input id / source id] port / type");
+			Console.WriteLine("[input id / source id] (off/REC) port / type");
 			foreach (AtemAudioInputSource audioSource in atem.GetAudioInputSources()) {
-				Console.WriteLine(string.Format("[{0,6}/{1,6}] {2} / {3} {4} ",
+
+				audioSource.m_audioSource.IsMixedIn(out int mixedIn);
+				String mixedInString = "off";
+				if (mixedIn == 1)
+                {
+					mixedInString = "REC";
+                }
+
+				Console.WriteLine(string.Format("[{0,6}/{1,6}] {2} {3} / {4} {5} ",
 					audioSource.inputId,
 					audioSource.sourceId,
+					mixedInString,
 					audioSource.getPortType(),
 					audioSource.getInputType(),
 					audioSource.getSourceType()

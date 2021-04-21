@@ -63,6 +63,8 @@ namespace AtemAudioMonitorSwitcher
 				Console.CursorTop = lineIndex + 2;
 				Console.CursorLeft = 0;
 
+				m_audioSource.IsMixedIn(out int mixedIn);
+
 				// draw -50 to 0 db - lets use 25 characters for this, so each character is 2db.
 				int characters = 50 + (int)Math.Round(levels);
 				if (characters < 0) characters = 0;
@@ -70,6 +72,16 @@ namespace AtemAudioMonitorSwitcher
 				characters = (int)Math.Floor(characters / 2f);
 
 				Console.Write(string.Format("[{0,6}/{1,6}] ", inputId, sourceId));
+
+				if (mixedIn == 0)
+                {
+					Console.ForegroundColor = ConsoleColor.White;
+					Console.Write("off ");
+				} else
+                {
+					Console.ForegroundColor = ConsoleColor.Red;
+					Console.Write("REC ");
+				}
 
 				Console.ForegroundColor = ConsoleColor.Green;
 				for (int y=0; y<25; y++)
