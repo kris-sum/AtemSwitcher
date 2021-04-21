@@ -9,15 +9,14 @@ namespace AtemAudioMonitorSwitcher
 	public class AtemSwitcher
 	{
 		private IBMDSwitcher switcher;
-
 		private IBMDSwitcherFairlightAudioMixer audioMixer;
-		public AtemSwitcher(IBMDSwitcher switcher) => this.switcher = switcher;
 
 		private List<IBMDSwitcherInput> m_switcherInputs;
-
 		private List<IBMDSwitcherFairlightAudioInput> m_allInputs; // all audio inputs
 		private List<IBMDSwitcherFairlightAudioSource> m_allSources; // all audio sources (iterated each input)
 		private List<AtemAudioInputSource> m_audioInputSources; // our own object, combination of the above two inputs
+
+		public AtemSwitcher(IBMDSwitcher switcher) => this.switcher = switcher;
 
 		public List<IBMDSwitcherFairlightAudioInput> GetAudioInputs()
 		{
@@ -41,7 +40,6 @@ namespace AtemAudioMonitorSwitcher
 		public void fetchAudioInputs()
 		{
 			audioMixer = (IBMDSwitcherFairlightAudioMixer)switcher;
-			// audioMixer.SetAllLevelNotificationsEnabled(1);
 
 			Guid audioIteratorIID = typeof(IBMDSwitcherFairlightAudioInputIterator).GUID;
 			IntPtr audioIteratorPtr;
@@ -125,12 +123,10 @@ namespace AtemAudioMonitorSwitcher
 				IBMDSwitcherInputIterator inputIterator = Marshal.GetObjectForIUnknown(inputIteratorPtr) as IBMDSwitcherInputIterator;
 				if (inputIterator == null)
 					yield break;
-
 				// Scan through all inputs
 				while (true)
 				{
 					inputIterator.Next(out IBMDSwitcherInput input);
-
 					if (input != null)
 						yield return input;
 					else

@@ -60,15 +60,10 @@ namespace AtemAudioMonitorSwitcher
 			}
 			if (numLevels > 0 && levels != double.NegativeInfinity)
 			{
-				//Console.ForegroundColor = BorderColor;
-				Console.CursorTop = lineIndex + 4;
+				Console.CursorTop = lineIndex + 2;
 				Console.CursorLeft = 0;
-				//Console.Write(s);
-				//Console.ResetColor();
 
-				//
-				// draw -50 to 0 - lets use 25 characters for this, so each character is 2db.
-				//
+				// draw -50 to 0 db - lets use 25 characters for this, so each character is 2db.
 				int characters = 50 + (int)Math.Round(levels);
 				if (characters < 0) characters = 0;
 
@@ -96,12 +91,7 @@ namespace AtemAudioMonitorSwitcher
                     }
 				}
 				Console.ForegroundColor = ConsoleColor.White;
-				/*
-				Console.Write(string.Concat(Enumerable.Repeat('=', characters)));
-				if (characters < 25)
-				{
-					Console.Write(string.Concat(Enumerable.Repeat(' ', 25 - characters)));
-				}*/
+
 				Console.Write(string.Format("{0,5:00.00} dB {1} {2} {3}", levels,
 					getPortType(),
 					getInputType(),
