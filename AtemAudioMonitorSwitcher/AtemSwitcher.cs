@@ -11,10 +11,45 @@ namespace AtemAudioMonitorSwitcher
 		private IBMDSwitcher switcher;
 		private IBMDSwitcherFairlightAudioMixer audioMixer;
 
-		private List<IBMDSwitcherInput> m_switcherInputs;
+		private List<AtemSwitcherInput> m_switcherInputs; // our own object,
 		private List<IBMDSwitcherFairlightAudioInput> m_allInputs; // all audio inputs
 		private List<IBMDSwitcherFairlightAudioSource> m_allSources; // all audio sources (iterated each input)
 		private List<AtemAudioInputSource> m_audioInputSources; // our own object, combination of the above two inputs
+
+		private IBMDSwitcherInput previewSwitcherInput;
+		private IBMDSwitcherInput programSwitcherInput;
+
+		public static AtemSwitcher Connect(String ipAddress)
+		{
+			Console.WriteLine("Connecting to "+ipAddress+" ...");
+			IBMDSwitcherDiscovery discovery = new CBMDSwitcherDiscovery();
+			_BMDSwitcherConnectToFailure failureReason = 0;
+			try
+			{
+				discovery.ConnectTo(ipAddress, out IBMDSwitcher switcher, out failureReason);
+				Console.WriteLine("Connected");
+				AtemSwitcher atem = new AtemSwitcher(switcher);
+				atem.fetchAudioInputs();
+				atem.fetchSwitcherInputs();
+				return atem;
+			}
+			catch (COMException)
+			{
+				switch (failureReason)
+				{
+					case _BMDSwitcherConnectToFailure.bmdSwitcherConnectToFailureNoResponse:
+						Console.WriteLine("No response");
+						break;
+					case _BMDSwitcherConnectToFailure.bmdSwitcherConnectToFailureIncompatibleFirmware:
+						Console.WriteLine("Incompatible firmware");
+						break;
+					default:
+						Console.WriteLine("Unable to connect: " + failureReason.ToString());
+						break;
+				}
+				return null;
+			}
+		}
 
 		public AtemSwitcher(IBMDSwitcher switcher) => this.switcher = switcher;
 
@@ -22,19 +57,24 @@ namespace AtemAudioMonitorSwitcher
 		{
 			return m_allInputs;
 		}
-
 		public List<IBMDSwitcherFairlightAudioSource> GetAudioSources()
 		{
 			return m_allSources;
 		}
-
-		public List<IBMDSwitcherInput> GetSwitcherInputs()
+		public List<AtemSwitcherInput> GetSwitcherInputs()
 		{
 			return m_switcherInputs;
 		}
 		public List<AtemAudioInputSource> GetAudioInputSources()
 		{
 			return m_audioInputSources;
+		}
+		public void setPreviewSwitcherInput(IBMDSwitcherInput input) {
+			previewSwitcherInput = input;
+		}
+		public void setProgramSwitcherInput(IBMDSwitcherInput input)
+		{
+			programSwitcherInput = input;
 		}
 
 		public void fetchAudioInputs()
@@ -107,14 +147,20 @@ namespace AtemAudioMonitorSwitcher
 
 		public void fetchSwitcherInputs()
 		{
-			m_switcherInputs = SwitcherInputs.Where((i, ret) =>
-			{
+			m_switcherInputs = new List<AtemSwitcherInput>();
+
+			foreach(IBMDSwitcherInput i in SwitcherInputs.Where((i, ret) => {
 				i.GetPortType(out _BMDSwitcherPortType type);
 				return type == _BMDSwitcherPortType.bmdSwitcherPortTypeExternal;
-			}).ToList();
+			}).ToList())
+            {
+				AtemSwitcherInput switcherInput = new AtemSwitcherInput(this, i);
+				i.AddCallback(switcherInput);
+				m_switcherInputs.Add(switcherInput);
+			};
 		}
 
-		public IEnumerable<IBMDSwitcherInput> SwitcherInputs
+		protected IEnumerable<IBMDSwitcherInput> SwitcherInputs
 		{
 			get
 			{

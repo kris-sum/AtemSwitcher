@@ -12,78 +12,108 @@ namespace AtemAudioMonitorSwitcher
 {
     class Program
     {
-		public class Options
+
+		[Verb("list", isDefault: true, HelpText = "List switcher inputs")]
+		public class DefaultVerbOption
+		{
+			[Value(0, Required = true, HelpText = "Switcher IP address")]
+			public String IP { get; set; }
+		}
+
+		[Verb("monitor", HelpText = "monitor line levels")]
+		public class MonitorVerbOption
+		{
+			[Value(0, Required = true, HelpText = "Switcher IP address")]
+			public String IP { get; set; }
+		}
+
+		[Verb("autoswitch", HelpText = "auto switch between inputs based on line levels")]
+		public class AutoSwitchVerbOption
 		{
 			[Value(0, Required = true, HelpText = "Switcher IP address")]
 			public String IP { get; set; }
 
-			[Option('m', "mode", Default = "list",  Required = false, HelpText = "Mode of operation : [ list | monitor ]")]
-			public String Mode { get; set; }
+			[Option("mappings", HelpText = "Mapping of inputs in the form inputId/sourceId=outputSwitcherInputId , e.g. 1301/-255=1 1301/-256=2 ")]
+			public IEnumerable<string> Mappings { get; set; } //sequence
 		}
+
 
 		static void Main(string[] args)
         {
-			CommandLine.Parser.Default.ParseArguments<Options>(args)
-				.WithParsed(RunOptions)
-				.WithNotParsed(HandleParseError);
+			CommandLine.Parser.Default.ParseArguments<DefaultVerbOption, MonitorVerbOption, AutoSwitchVerbOption>(args)
+			  .MapResult(
+				(DefaultVerbOption opts) => RunListInputs(opts),
+				(MonitorVerbOption opts) => RunMonitorLineLevels(opts),
+				(AutoSwitchVerbOption opts) => RunAutoSwitch(opts),
+				errors => 1);
 		}
 
-		static void RunOptions(Options opts)
+		static int RunListInputs(DefaultVerbOption opts)
 		{
-			IBMDSwitcherDiscovery discovery = new CBMDSwitcherDiscovery();
-			AtemSwitcher atem;
-			_BMDSwitcherConnectToFailure failureReason = 0;
+			AtemSwitcher atem = AtemSwitcher.Connect(opts.IP);
+			if (atem == null)
+            {
+				return 1;
+            }
+
+			dumpInputsToConsole(atem);
+			return 0;
+		}
+		static int RunMonitorLineLevels(MonitorVerbOption opts)
+        {
+			AtemSwitcher atem = AtemSwitcher.Connect(opts.IP);
+			if (atem == null)
+			{
+				return 1;
+			}
+			AutoResetEvent evt = new AutoResetEvent(false);
 			try
 			{
-				discovery.ConnectTo(opts.IP, out IBMDSwitcher switcher, out failureReason);
-				Console.WriteLine("Connected");
-				atem = new AtemSwitcher(switcher);
-			}
-			catch (COMException)
-			{
-				switch (failureReason)
-				{
-					case _BMDSwitcherConnectToFailure.bmdSwitcherConnectToFailureNoResponse:
-						Console.WriteLine("No response");
-						break;
-					case _BMDSwitcherConnectToFailure.bmdSwitcherConnectToFailureIncompatibleFirmware:
-						Console.WriteLine("Incompatible firmware");
-						break;
-					default:
-						Console.WriteLine("Unable to connect: " + failureReason.ToString());
-						break;
-				}
-				return;
-			}
-
-			atem.fetchAudioInputs();
-			atem.fetchSwitcherInputs();
-
-			switch (opts.Mode)
+				atem.startAudioMonitoring();
+				evt.WaitOne();
+				return 0;
+			} catch (Exception e)
             {
-				case "monitor":
-					AutoResetEvent evt = new AutoResetEvent(false);
-					monitorAVlevels(atem);
-					evt.WaitOne();
-					break;
-				default:
-					dumpInputsToConsole(atem);
-					break;
-            }
-			
+				Console.WriteLine(e.Message);
+				return 1;
+			}
+		}
+
+		static int RunAutoSwitch(AutoSwitchVerbOption opts)
+        {
+			AtemSwitcher atem = AtemSwitcher.Connect(opts.IP);
+			if (atem == null)
+			{
+				return 1;
+			}
+			AutoResetEvent evt = new AutoResetEvent(false);
+			try
+			{
+				AutoSwitch autoswitch = new AutoSwitch(atem);
+				autoswitch.setOptions(opts);
+				autoswitch.run();
+				evt.WaitOne();
+				return 0;
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine(e.Message);
+				return 1;
+			}
 		}
 
 		protected static void dumpInputsToConsole(AtemSwitcher atem)
         {
 			Console.WriteLine("Switcher Inputs:");
-			Console.WriteLine("[id] name");
-			foreach (IBMDSwitcherInput input in atem.GetSwitcherInputs())
+			Console.WriteLine("[id] name (PREVIEW/PROGRAM)");
+			foreach (AtemSwitcherInput switcherInput in atem.GetSwitcherInputs())
 			{
 				String name;
-				input.GetShortName(out name);
-				long inputId;
-				input.GetInputId(out inputId);
-				Console.WriteLine("[" + inputId.ToString() + "] " + name);
+				switcherInput.GetInput().GetShortName(out name);
+				String programPreview = "";
+				if (switcherInput.isPreviewTallied == 1) { programPreview = "(PREVIEW)"; }
+				if (switcherInput.isProgramTallied == 1) { programPreview = "(PROGRAM)"; }
+				Console.WriteLine("[" + switcherInput.inputId.ToString() + "] " + name + " " + programPreview);
 			}
 			Console.WriteLine("");
 
@@ -109,15 +139,6 @@ namespace AtemAudioMonitorSwitcher
 			}
 		}
 
-		protected static void monitorAVlevels(AtemSwitcher atem)
-        {
-			atem.startAudioMonitoring();
-		}
-
-		static void HandleParseError(IEnumerable<Error> errs)
-		{
-			//handle errors
-		}
 	}
 
 

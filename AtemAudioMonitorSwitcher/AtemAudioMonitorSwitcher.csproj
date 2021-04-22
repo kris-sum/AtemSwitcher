@@ -64,8 +64,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AtemAudioSource.cs" />
+    <Compile Include="AtemAudioInputSource.cs" />
     <Compile Include="AtemSwitcher.cs" />
+    <Compile Include="AtemSwitcherInput.cs" />
+    <Compile Include="AutoSwitch.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
