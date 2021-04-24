@@ -8,8 +8,8 @@ using BMDSwitcherAPI;
 
 namespace AtemAudioMonitorSwitcher
 {
-    public class BaseAudioSource : IBMDSwitcherFairlightAudioSourceCallback
-    {
+	public class BaseAudioSource : IBMDSwitcherFairlightAudioSourceCallback
+	{
 		public IBMDSwitcherFairlightAudioInput m_audioInput;
 		public _BMDSwitcherFairlightAudioInputType inputType;
 		public _BMDSwitcherExternalPortType portType;
@@ -17,6 +17,16 @@ namespace AtemAudioMonitorSwitcher
 		public _BMDSwitcherFairlightAudioSourceType sourceType;
 		public long inputId;
 		public long sourceId;
+		public double pan;
+
+		protected void populateProperties() { 
+			this.m_audioInput.GetId(out inputId);
+            this.m_audioInput.GetCurrentExternalPortType(out portType);
+            this.m_audioInput.GetType(out inputType);
+            this.m_audioSource.GetId(out sourceId);
+            this.m_audioSource.GetSourceType(out sourceType);
+            this.m_audioSource.GetPan(out pan);
+		}
 
 		public virtual void Notify(_BMDSwitcherFairlightAudioSourceEventType eventType)
         {

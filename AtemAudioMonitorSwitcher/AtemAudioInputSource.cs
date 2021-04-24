@@ -16,11 +16,7 @@ namespace AtemAudioMonitorSwitcher
 			m_audioInput = audioInput;
 			m_audioSource = audioSource;
 			lineIndex = index;
-			this.m_audioInput.GetCurrentExternalPortType(out portType);
-			this.m_audioInput.GetId(out inputId);
-			this.m_audioInput.GetType(out inputType);
-			this.m_audioSource.GetId(out sourceId);
-			this.m_audioSource.GetSourceType(out sourceType);
+			this.populateProperties();
 		}
 
 		public override void Notify(_BMDSwitcherFairlightAudioSourceEventType eventType)

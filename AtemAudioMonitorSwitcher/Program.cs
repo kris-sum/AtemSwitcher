@@ -139,13 +139,14 @@ namespace AtemAudioMonitorSwitcher
 					mixedInString = "REC";
                 }
 
-				Console.WriteLine(string.Format("[{0,6}/{1,6}] {2} {3} / {4} {5} ",
+				Console.WriteLine(string.Format("[{0,6}/{1,6}] {2} {3} / {4} {5} pan {6}",
 					audioSource.inputId,
 					audioSource.sourceId,
 					mixedInString,
 					audioSource.getPortType(),
 					audioSource.getInputType(),
-					audioSource.getSourceType()
+					audioSource.getSourceType(),
+					audioSource.pan
 					));
 			}
 		}
