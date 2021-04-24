@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-    <StartArguments>autoswitch 192.168.250.81 --mappings 1301/-255=1 1301/-256=2</StartArguments>
+    <StartArguments>autoswitch 192.168.250.81 --mappings 1301/-255=1 1301/-256=2 1302/-65280=3</StartArguments>
   </PropertyGroup>
   <PropertyGroup>
     <PublishUrlHistory>publish\</PublishUrlHistory>

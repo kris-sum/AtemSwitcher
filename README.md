@@ -1,6 +1,15 @@
+
+AtemAudioMonitorSwitcher.exe 192.168.250.81
+
+AtemAudioMonitorSwitcher.exe monitor 192.168.250.81
+
+AtemAudioMonitorSwitcher.exe autoswitch 192.168.250.81 --mappings 1301/-255=1 1301/-256=2 1302/-65280=3
+
+---
+
 https://note.com/taku_min/n/n985beda711f4
 Takumin
-2020/07/07 00:09
+2020/07/07 00:10
 
 
 ATEM mini / PRO is Fairlight audio, so the root object for audio control is

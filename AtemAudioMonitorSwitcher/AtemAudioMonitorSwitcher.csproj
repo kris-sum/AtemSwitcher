@@ -68,6 +68,7 @@
     <Compile Include="AtemSwitcher.cs" />
     <Compile Include="AtemSwitcherInput.cs" />
     <Compile Include="AutoSwitch.cs" />
+    <Compile Include="BaseAudioSource.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -41,14 +41,14 @@ namespace AtemAudioMonitorSwitcher
         }
         public void informPreviewOrProgram()
         {
-            // isPreviewTallied doesn't seem to work?
+            // isPreviewTallied returns 2?
             m_switcherInput.IsPreviewTallied(out isPreviewTallied);
-            if (isPreviewTallied == 1)
+            if (isPreviewTallied >= 1)
             {
                 parentSwitcher.setPreviewSwitcherInput(m_switcherInput);
             }
             m_switcherInput.IsProgramTallied(out isProgramTallied);
-            if (isProgramTallied == 1)
+            if (isProgramTallied >= 1)
             {
                 parentSwitcher.setProgramSwitcherInput(m_switcherInput);
             }

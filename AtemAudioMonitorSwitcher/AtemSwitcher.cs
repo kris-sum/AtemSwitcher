@@ -160,6 +160,30 @@ namespace AtemAudioMonitorSwitcher
 			};
 		}
 
+		public void transitionTo(long switcherInputId, int duration = 200)
+		{
+			this.programSwitcherInput.GetInputId(out long currentProgramId);
+			transitionFromTo(currentProgramId, switcherInputId, duration);
+		}
+
+		public void transitionFromTo(long prevSwitcherInputId, long switcherInputId, int duration = 200)
+        {
+			Console.WriteLine("Transitioning to " + switcherInputId +" from " + prevSwitcherInputId);
+			// Get reference to various objects
+			IBMDSwitcherMixEffectBlock me0 = this.MixEffectBlocks.First();
+			IBMDSwitcherTransitionParameters me0TransitionParams = me0 as IBMDSwitcherTransitionParameters;
+			
+			//this.programSwitcherInput.GetInputId(out long currentProgramId);
+			me0.SetPreviewInput(prevSwitcherInputId);
+			me0.SetProgramInput(switcherInputId);
+			/*
+			me0TransitionParams.SetNextTransitionSelection(_BMDSwitcherTransitionSelection.bmdSwitcherTransitionSelectionBackground);
+			me0TransitionParams.SetNextTransitionStyle(_BMDSwitcherTransitionStyle.bmdSwitcherTransitionStyleMix);
+			*/
+			//me0.PerformAutoTransition();
+			me0.PerformCut();
+		}
+
 		protected IEnumerable<IBMDSwitcherInput> SwitcherInputs
 		{
 			get
@@ -180,5 +204,29 @@ namespace AtemAudioMonitorSwitcher
 				}
 			}
 		}
+
+		protected IEnumerable<IBMDSwitcherMixEffectBlock> MixEffectBlocks
+		{
+			get
+			{
+				// Create a mix effect block iterator
+				switcher.CreateIterator(typeof(IBMDSwitcherMixEffectBlockIterator).GUID, out IntPtr meIteratorPtr);
+				IBMDSwitcherMixEffectBlockIterator meIterator = Marshal.GetObjectForIUnknown(meIteratorPtr) as IBMDSwitcherMixEffectBlockIterator;
+				if (meIterator == null)
+					yield break;
+
+				// Iterate through all mix effect blocks
+				while (true)
+				{
+					meIterator.Next(out IBMDSwitcherMixEffectBlock me);
+
+					if (me != null)
+						yield return me;
+					else
+						yield break;
+				}
+			}
+		}
+
 	}
 }

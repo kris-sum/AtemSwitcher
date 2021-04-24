@@ -35,6 +35,15 @@ namespace AtemAudioMonitorSwitcher
 
 			[Option("mappings", HelpText = "Mapping of inputs in the form inputId/sourceId=outputSwitcherInputId , e.g. 1301/-255=1 1301/-256=2 ")]
 			public IEnumerable<string> Mappings { get; set; } //sequence
+
+			[Option("sampleThreshold", HelpText = "Threshold (in -db) that a sample needs to be to activate the switcher", Default = -20)]
+			public int sampleThreshold { get; set; }
+
+			[Option("sampleInterval", HelpText = "How often (in ms) do we check the levels", Default = 200)]
+			public int sampleInterval { get; set; }
+
+			[Option("sampleCount", HelpText = "How many contiguous samples do we need before we switch?",  Default = 10)]
+			public int sampleCount { get; set; }
 		}
 
 
@@ -50,6 +59,7 @@ namespace AtemAudioMonitorSwitcher
 
 		static int RunListInputs(DefaultVerbOption opts)
 		{
+			Console.Clear();
 			AtemSwitcher atem = AtemSwitcher.Connect(opts.IP);
 			if (atem == null)
             {
@@ -60,7 +70,8 @@ namespace AtemAudioMonitorSwitcher
 			return 0;
 		}
 		static int RunMonitorLineLevels(MonitorVerbOption opts)
-        {
+		{
+			Console.Clear();
 			AtemSwitcher atem = AtemSwitcher.Connect(opts.IP);
 			if (atem == null)
 			{
@@ -111,8 +122,8 @@ namespace AtemAudioMonitorSwitcher
 				String name;
 				switcherInput.GetInput().GetShortName(out name);
 				String programPreview = "";
-				if (switcherInput.isPreviewTallied == 1) { programPreview = "(PREVIEW)"; }
-				if (switcherInput.isProgramTallied == 1) { programPreview = "(PROGRAM)"; }
+				if (switcherInput.isPreviewTallied >= 1) { programPreview = "(PREVIEW)"; }
+				if (switcherInput.isProgramTallied >= 1) { programPreview = "(PROGRAM)"; }
 				Console.WriteLine("[" + switcherInput.inputId.ToString() + "] " + name + " " + programPreview);
 			}
 			Console.WriteLine("");
