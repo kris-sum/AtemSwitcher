@@ -39,10 +39,10 @@ namespace AtemAudioMonitorSwitcher
 			[Option("sampleThreshold", HelpText = "Threshold (in -db) that a sample needs to be to activate the switcher", Default = -20)]
 			public int sampleThreshold { get; set; }
 
-			[Option("sampleInterval", HelpText = "How often (in ms) do we check the levels", Default = 200)]
+			[Option("sampleInterval", HelpText = "How often (in ms) do we check the levels", Default = 100)]
 			public int sampleInterval { get; set; }
 
-			[Option("sampleCount", HelpText = "How many contiguous samples do we need before we switch?",  Default = 10)]
+			[Option("sampleCount", HelpText = "How many contiguous samples do we need before we switch?",  Default = 5)]
 			public int sampleCount { get; set; }
 		}
 

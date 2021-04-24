@@ -173,15 +173,10 @@ namespace AtemAudioMonitorSwitcher
 			IBMDSwitcherMixEffectBlock me0 = this.MixEffectBlocks.First();
 			IBMDSwitcherTransitionParameters me0TransitionParams = me0 as IBMDSwitcherTransitionParameters;
 			
-			//this.programSwitcherInput.GetInputId(out long currentProgramId);
 			me0.SetPreviewInput(prevSwitcherInputId);
 			me0.SetProgramInput(switcherInputId);
-			/*
-			me0TransitionParams.SetNextTransitionSelection(_BMDSwitcherTransitionSelection.bmdSwitcherTransitionSelectionBackground);
-			me0TransitionParams.SetNextTransitionStyle(_BMDSwitcherTransitionStyle.bmdSwitcherTransitionStyleMix);
-			*/
-			//me0.PerformAutoTransition();
-			me0.PerformCut();
+			// nb - don't need to perform a cut, as we've just set the program/preview
+			// me0.PerformCut();
 		}
 
 		protected IEnumerable<IBMDSwitcherInput> SwitcherInputs
