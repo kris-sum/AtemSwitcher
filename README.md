@@ -17,7 +17,7 @@ For ease of use, included in this repo is the BMDSwitcherAPI.tlb file, built fro
 
 ## Pre-built binaries
 
-If you just want a pre-built x64 windows binary, grab the zip file from the releases section on github.
+If you just want a pre-built x64 windows binary, grab the zip file from the [releases section](https://github.com/kris-sum/AtemSwitcher/releases) on github.
 
 ## Example commandlines
 
