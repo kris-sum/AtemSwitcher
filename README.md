@@ -1,137 +1,38 @@
+# Blackmagic Atem Audio Monitor / Switcher
 
-AtemAudioMonitorSwitcher.exe 192.168.250.81
+This utility lets the Blackmagic ATEM mini automatically switch HDMI inputs based on an audio input of your choosing - particularly useful if you use it for live podcasting, where you have multiple people mic'd up with seperate video cameras and you want the cameras to follow the microphones, like in Zoom or Teams. 
 
-AtemAudioMonitorSwitcher.exe monitor 192.168.250.81
+Watch it in action here: 
+https://www.youtube.com/watch?v=5Lme_szgvQk
 
-AtemAudioMonitorSwitcher.exe autoswitch 192.168.250.81 --mappings 1301/-255=1 1301/-256=2 1302/-65280=3
+> Note: C# is not my native environment, so please send pull requests / issues if you know of better ways to do things!
 
----
+## THIS IS A BETA
 
-https://note.com/taku_min/n/n985beda711f4
-Takumin
-2020/07/07 00:10
+This is the very first public release of this code, so there may be bugs and missing features.
 
+# Building
 
-ATEM mini / PRO is Fairlight audio, so the root object for audio control is
+For ease of use, included in this repo is the BMDSwitcherAPI.tlb file, built from 8.6.1 SDK BMDSwitcherAPI.idl file in https://www.blackmagicdesign.com/developer/product/atem . You should be able to just build from the Visual Studio IDE, no cmake required.
 
-`IBMDSwitcherAudioMixer` not, `IBMDSwitcherFairlightAudioMixer`
+## Pre-built binaries
 
-Audio Input and Audio Source
+If you just want a pre-built x64 windows binary, grab the zip file from the releases section on github.
 
-And while  `IBMDSwitcherAudioMixer` could simply create an AudioInput iterator and then enum it to find the Input, these models with FairlightMixer have an AudioSource iterator for each Input after iterating the AudioInput. You can get objects that you can touch variously as audio channels for the first time by creating and enum. You can see this by actually getting the object in VS2019. There are no good methods or properties attached to AudioInput.
+## Example commandlines
 
+List device inputs
 
-    internal class AtemAudioMixer
-    {
-            private IBMDSwitcherFairlightAudioMixer m_audiomixer;
-            private List<IBMDSwitcherFairlightAudioInput> m_allInputs; // all inputs
-            private List<IBMDSwitcherFairlightAudioSource> m_allSources; // all sources (iterated each input)
-            public AtemAudioMixer(IBMDSwitcher switcher)
-        {
-                this.m_audiomixer = (IBMDSwitcherFairlightAudioMixer)switcher;
-                Guid audioIteratorIID = typeof(IBMDSwitcherFairlightAudioInputIterator).GUID;
-                IntPtr audioIteratorPtr;
-                IBMDSwitcherFairlightAudioInputIterator audioIterator = null;
-                m_audiomixer.CreateIterator(ref audioIteratorIID, out audioIteratorPtr);
-                if (audioIteratorPtr != null)
-                {
-                    audioIterator = (IBMDSwitcherFairlightAudioInputIterator)Marshal.GetObjectForIUnknown(audioIteratorPtr);
-                }
+    AtemAudioMonitorSwitcher.exe 192.168.250.81
 
-                m_allInputs = new List<IBMDSwitcherFairlightAudioInput>();
-                m_allSources = new List<IBMDSwitcherFairlightAudioSource>();
-                while (true)
-                {
-                    IBMDSwitcherFairlightAudioInput audioInput;
-                    audioIterator.Next(out audioInput);
-                    if (audioInput == null)
-                    {
-                        break;
-                    }
-                    m_allInputs.Add(audioInput);
+Monitor audio inputs with a text-mode VU meter
 
-                    // added all sources 
-                    Guid audioSourceIteratorIID = typeof(IBMDSwitcherFairlightAudioSourceIterator).GUID;
-                    IntPtr audioSourceIteratorPtr;
-                    IBMDSwitcherFairlightAudioSourceIterator audioSourceIterator = null;
-                    audioInput.CreateIterator(ref audioSourceIteratorIID, out audioSourceIteratorPtr);
-                    if (audioSourceIteratorPtr != null)
-                    {
-                        audioSourceIterator = (IBMDSwitcherFairlightAudioSourceIterator)Marshal.GetObjectForIUnknown(audioSourceIteratorPtr);
-                    }
-                    while(true)
-                {
-                        IBMDSwitcherFairlightAudioSource audioSource;
-                        audioSourceIterator.Next(out audioSource);
-                        if (audioSource == null)
-                        {
-                            break;
-                        }
-                        m_allSources.Add(audioSource);
-                    }
-                }
-            }
+    AtemAudioMonitorSwitcher.exe monitor 192.168.250.81
 
-            public List<IBMDSwitcherFairlightAudioInput> GetAudioInputs()
-        {
-                return m_allInputs;
-            }
+Auto-switch mic1 L to HDMI 1, mic1 R to HDMI 2, and mic3 to HDMI 3
 
-            public List<IBMDSwitcherFairlightAudioSource> GetAudioSources()
-        {
-                return m_allSources;
-        }
-        }
+    AtemAudioMonitorSwitcher.exe autoswitch 192.168.250.81 --mappings 1301/-255=1 1301/-256=2 1302/-65280=3
 
+# Credits
 
-Calling code
-
-            IBMDSwitcherDiscovery discovery = new CBMDSwitcherDiscovery();
-			IBMDSwitcher switcher;
-			_BMDSwitcherConnectToFailure failureReason;
-			discovery.ConnectTo("192.168.xx.xx", out switcher, out failureReason);
-
-            // ...
-
-            AtemAudioMixer audioMixer = new AtemAudioMixer(switcher);
-			foreach(var audioInput in audioMixer.GetAudioInputs())
-            {
-				_BMDSwitcherExternalPortType portType;
-				audioInput.GetCurrentExternalPortType(out portType);
-				Console.WriteLine("AudioPortType: " + portType.ToString());
-			}
-
-			foreach(var audioSource in audioMixer.GetAudioSources())
-            {
- 				_BMDSwitcherFairlightAudioSourceType sourceType;
-				audioSource.GetSourceType(out sourceType);
-				Console.WriteLine("AudioSourceType: " + sourceType.ToString());
-
-				double faderGain;
-				audioSource.GetFaderGain(out faderGain);
-                // 例えばフェーダーのゲインを取ってみる。
-				Console.WriteLine("FaderGain: " + faderGain.ToString());
-			}
-
-Output
-
-AudioPortType: bmdSwitcherExternalPortTypeHDMI
-AudioPortType: bmdSwitcherExternalPortTypeHDMI
-AudioPortType: bmdSwitcherExternalPortTypeHDMI
-AudioPortType: bmdSwitcherExternalPortTypeHDMI
-AudioPortType: bmdSwitcherExternalPortTypeTSJack // <-- マイクジャック1
-AudioPortType: bmdSwitcherExternalPortTypeTSJack // <-- マイクジャック2
-AudioSourceType: bmdSwitcherFairlightAudioSourceTypeStereo // HDMI 1
-FaderGain: 0
-AudioSourceType: bmdSwitcherFairlightAudioSourceTypeStereo // HDMI 2
-FaderGain: 0
-AudioSourceType: bmdSwitcherFairlightAudioSourceTypeStereo // HDMI 3
-FaderGain: 0
-AudioSourceType: bmdSwitcherFairlightAudioSourceTypeStereo // HDMI 4
-FaderGain: 0
-AudioSourceType: bmdSwitcherFairlightAudioSourceTypeStereo // Mic 1
-FaderGain: 0
-AudioSourceType: bmdSwitcherFairlightAudioSourceTypeMono // Mic 2 (mono A)
-FaderGain: 0
-AudioSourceType: bmdSwitcherFairlightAudioSourceTypeMono // Mic 2 (mono B)
-FaderGain: 0
+Big thanks to Takumin 's post at https://note.com/taku_min/n/n985beda711f4 which pointed me in the right direction on a few things.
