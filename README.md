@@ -18,6 +18,7 @@ For ease of use, included in this repo is the BMDSwitcherAPI.tlb file, built fro
 ## Pre-built binaries
 
 If you just want a pre-built x64 windows binary, grab the zip file from the [releases section](https://github.com/kris-sum/AtemSwitcher/releases) on github.
+Note: Make sure you have the ATEM switchers software installed on your computer first from https://www.blackmagicdesign.com/support/family/atem-live-production-switchers .
 
 ## Example commandlines
 
